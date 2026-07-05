@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DB프로덕션 — 영상으로 브랜드를 완성하다</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #0A0A0C; color: #EDEDED;
+    font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+    line-height: 1.6; overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  .eyebrow { font-size: 12px; letter-spacing: 0.35em; text-transform: uppercase; color: #FF5C35; font-weight: 600; margin-bottom: 16px; }
+  .section-title { font-size: clamp(28px, 4vw, 44px); font-weight: 700; letter-spacing: -0.01em; color: #F5F5F5; }
+  .section-sub { font-size: 16px; color: #9A9AA2; margin-top: 14px; max-width: 560px; line-height: 1.8; }
+  section { position: relative; }
+
+  /* ── Nav ─────────────────────────────────────────── */
+  #nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 32px; transition: all 0.35s ease;
+    background: transparent;
+  }
+  #nav.scrolled { background: rgba(10,10,12,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 16px 32px; }
+  .logo { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500; letter-spacing: 0.04em; }
+  .logo b { color: #FF5C35; font-weight: 500; }
+  .nav-links { display: flex; gap: 40px; font-size: 14px; font-weight: 500; color: #C7C7CE; }
+  .nav-links a { transition: color 0.2s; }
+  .nav-links a:hover { color: #FF5C35; }
+  .nav-cta { padding: 10px 22px; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; font-size: 13px; font-weight: 600; transition: all 0.25s; }
+  .nav-cta:hover { background: #FF5C35; border-color: #FF5C35; color: #0A0A0C; }
+  .nav-burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .nav-burger span { width: 24px; height: 2px; background: #EDEDED; }
+
+  /* ── Hero ────────────────────────────────────────── */
+  #hero {
+    height: 100vh; min-height: 640px; display: flex; align-items: flex-end;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background: linear-gradient(160deg, #17171C 0%, #0A0A0C 55%, #0A0A0C 100%);
+  }
+  /* 실제 배경 영상 넣을 자리 — <video> 태그로 교체하면 됨 (아래 HTML 주석 참고) */
+  .hero-bg::after {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 20%, rgba(255,92,53,0.14), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 70%, rgba(255,255,255,0.05), transparent 60%);
+  }
+  .hero-noise { position: absolute; inset: 0; opacity: 0.4; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .hero-content { position: relative; z-index: 2; width: 100%; padding-bottom: 100px; }
+  .hero-eyebrow { font-size: 13px; letter-spacing: 0.4em; text-transform: uppercase; color: #FF5C35; font-weight: 600; margin-bottom: 26px; }
+  .hero-title { font-size: clamp(40px, 7vw, 88px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.08; color: #FAFAFA; }
+  .hero-title em { font-style: normal; color: transparent; -webkit-text-stroke: 1.5px #FAFAFA; }
+  .hero-desc { font-size: 17px; color: #ABABB4; max-width: 480px; margin-top: 28px; line-height: 1.85; }
+  .hero-actions { display: flex; gap: 16px; margin-top: 44px; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; border-radius: 40px; font-size: 14px; font-weight: 700; letter-spacing: 0.02em; cursor: pointer; transition: all 0.25s; border: none; font-family: inherit; }
+  .btn-primary { background: #FF5C35; color: #0A0A0C; }
+  .btn-primary:hover { background: #ff744f; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,92,53,0.35); }
+  .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.22); color: #EDEDED; }
+  .btn-ghost:hover { border-color: #EDEDED; }
+  .hero-scroll { position: absolute; bottom: 40px; right: 32px; z-index: 2; display: flex; align-items: center; gap: 12px; color: #8A8A94; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; }
+  .hero-scroll-line { width: 1px; height: 50px; background: linear-gradient(#FF5C35, transparent); animation: scrollLine 2s ease infinite; }
+  @keyframes scrollLine { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  .hero-stats { position: absolute; left: 32px; bottom: 40px; z-index: 2; display: flex; gap: 48px; }
+  .hero-stat b { display: block; font-size: 28px; font-weight: 800; color: #FAFAFA; font-family: 'Cormorant Garamond', serif; }
+  .hero-stat span { font-size: 12px; color: #8A8A94; letter-spacing: 0.05em; }
+
+  /* ── Portfolio ───────────────────────────────────── */
+  #portfolio { padding: 160px 0 140px; }
+  .portfolio-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px; flex-wrap: wrap; gap: 24px; }
+  .filter-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
+  .filter-tab { padding: 9px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.14); font-size: 13px; font-weight: 600; color: #ABABB4; cursor: pointer; transition: all 0.2s; background: transparent; font-family: inherit; }
+  .filter-tab.active, .filter-tab:hover { background: #FF5C35; border-color: #FF5C35; color: #0A0A0C; }
+
+  .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .portfolio-item { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 4/5; cursor: pointer; background: #141418; border: 1px solid rgba(255,255,255,0.06); }
+  .portfolio-item.wide { grid-column: span 2; aspect-ratio: 16/10; }
+  /* 실제 콘텐츠 채울 때: 이 .thumb-placeholder 를 <img> 또는 <video poster="..."> 로 교체 */
+  .thumb-placeholder {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1C1C22, #0F0F12);
+    font-family: 'Cormorant Garamond', serif; font-style: italic; color: #3A3A42; font-size: 15px; text-align: center; padding: 20px;
+  }
+  .portfolio-overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 26px; background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .portfolio-item:hover .portfolio-overlay { opacity: 1; }
+  .portfolio-item:hover .thumb-placeholder { transform: scale(1.04); }
+  .thumb-placeholder { transition: transform 0.4s ease; }
+  .portfolio-cat { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #FF5C35; font-weight: 700; margin-bottom: 8px; }
+  .portfolio-name { font-size: 19px; font-weight: 700; color: #FAFAFA; }
+  .portfolio-play {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0.8);
+    width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.3s ease;
+  }
+  .portfolio-item:hover .portfolio-play { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  .portfolio-play svg { margin-left: 3px; }
+
+  /* ── Services ────────────────────────────────────── */
+  #services { padding: 140px 0; background: #0E0E11; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,255,255,0.06); margin-top: 64px; border-radius: 20px; overflow: hidden; }
+  .service-card { background: #0E0E11; padding: 48px 38px; transition: background 0.3s ease; }
+  .service-card:hover { background: #16161A; }
+  .service-num { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #FF5C35; font-weight: 600; margin-bottom: 26px; }
+  .service-icon { width: 52px; height: 52px; border-radius: 14px; background: rgba(255,92,53,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 28px; color: #FF5C35; }
+  .service-title { font-size: 22px; font-weight: 700; color: #F5F5F5; margin-bottom: 14px; }
+  .service-desc { font-size: 14.5px; color: #9A9AA2; line-height: 1.9; margin-bottom: 22px; }
+  .service-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .service-tag { font-size: 11.5px; padding: 5px 12px; border-radius: 20px; background: rgba(255,255,255,0.05); color: #ABABB4; border: 1px solid rgba(255,255,255,0.08); }
+
+  /* ── About ───────────────────────────────────────── */
+  #about { padding: 150px 0; }
+  .about-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 90px; align-items: center; }
+  .about-visual { position: relative; aspect-ratio: 3/4; border-radius: 20px; overflow: hidden; background: linear-gradient(150deg, #1C1C22, #0A0A0C); border: 1px solid rgba(255,255,255,0.07); }
+  .about-visual .thumb-placeholder { font-size: 14px; }
+  .about-visual-badge { position: absolute; bottom: 24px; left: 24px; right: 24px; padding: 18px 22px; background: rgba(10,10,12,0.75); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; }
+  .about-visual-badge b { display: block; font-size: 26px; font-family: 'Cormorant Garamond', serif; color: #FF5C35; }
+  .about-visual-badge span { font-size: 12.5px; color: #ABABB4; }
+  .about-text p { font-size: 15.5px; color: #ABABB4; line-height: 2; margin-top: 24px; }
+  .about-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .about-stat b { display: block; font-size: 34px; font-weight: 800; font-family: 'Cormorant Garamond', serif; color: #FAFAFA; }
+  .about-stat span { font-size: 12.5px; color: #8A8A94; letter-spacing: 0.03em; }
+  .about-clients { margin-top: 56px; }
+  .about-clients-label { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #6E6E76; margin-bottom: 20px; }
+  .client-row { display: flex; flex-wrap: wrap; gap: 14px; }
+  .client-chip { padding: 9px 18px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 13px; color: #8A8A94; font-weight: 600; }
+
+  /* ── Contact ─────────────────────────────────────── */
+  #contact { padding: 150px 0 130px; background: #0E0E11; border-top: 1px solid rgba(255,255,255,0.05); }
+  .contact-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 80px; }
+  .contact-info-item { display: flex; gap: 18px; margin-top: 30px; align-items: flex-start; }
+  .contact-info-icon { width: 42px; height: 42px; border-radius: 12px; background: rgba(255,92,53,0.1); color: #FF5C35; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .contact-info-item b { display: block; font-size: 12px; color: #6E6E76; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .contact-info-item span { font-size: 16px; color: #E5E5E8; font-weight: 500; }
+
+  .contact-form { background: #141418; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 44px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .form-group { margin-bottom: 20px; }
+  .form-label { display: block; font-size: 12.5px; font-weight: 600; color: #9A9AA2; margin-bottom: 9px; letter-spacing: 0.02em; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; background: #0A0A0C; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+    padding: 13px 16px; color: #EDEDED; font-size: 14.5px; font-family: inherit; outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #FF5C35; }
+  .form-input::placeholder, .form-textarea::placeholder { color: #55555D; }
+  .form-textarea { resize: vertical; min-height: 110px; }
+  .form-select { cursor: pointer; }
+  .form-submit { width: 100%; justify-content: center; margin-top: 6px; }
+  .form-note { font-size: 12.5px; color: #6E6E76; margin-top: 16px; text-align: center; }
+
+  /* ── Footer ──────────────────────────────────────── */
+  footer { padding: 40px 0; }
+  .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 32px; }
+  .footer-copy { font-size: 13px; color: #6E6E76; }
+  .footer-links { display: flex; gap: 26px; font-size: 13px; color: #6E6E76; }
+  .footer-links a:hover { color: #ABABB4; }
+
+  /* ── Reveal animation ────────────────────────────── */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ── Responsive ──────────────────────────────────── */
+  @media (max-width: 900px) {
+    .nav-links, .nav-cta { display: none; }
+    .nav-burger { display: flex; }
+    .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+    .portfolio-item.wide { grid-column: span 2; }
+    .services-grid { grid-template-columns: 1fr; }
+    .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 50px; }
+    .form-row { grid-template-columns: 1fr; }
+    .hero-stats { display: none; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 20px; }
+    .portfolio-grid { grid-template-columns: 1fr; }
+    .portfolio-item.wide { grid-column: span 1; }
+    .about-stats { grid-template-columns: 1fr; gap: 24px; }
+    .contact-form { padding: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#hero" class="logo">DB<b>프로덕션</b></a>
+  <div class="nav-links">
+    <a href="#portfolio">포트폴리오</a>
+    <a href="#services">서비스</a>
+    <a href="#about">회사소개</a>
+    <a href="#contact">문의</a>
+  </div>
+  <a href="#contact" class="nav-cta">프로젝트 문의</a>
+  <div class="nav-burger"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- ══════════════════ HERO ══════════════════
+     실제 배경 영상 적용 시 .hero-bg 안에 아래처럼 video 태그 추가:
+     <video autoplay muted loop playsinline poster="여기에_포스터이미지.jpg">
+       <source src="여기에_배경영상.mp4" type="video/mp4">
+     </video>
+     그리고 video 뒤에 어두운 오버레이(div.hero-bg::after 그대로 유지)를 두면 톤이 유지됩니다.
+-->
+<section id="hero">
+  <div class="hero-bg"><div class="hero-noise"></div></div>
+  <div class="wrap hero-content">
+    <div class="hero-eyebrow">Video Production &amp; Post-Production Studio</div>
+    <h1 class="hero-title">움직이는 모든 것에<br><em>이야기</em>를 담습니다</h1>
+    <p class="hero-desc">DB프로덕션은 브랜드 필름부터 뮤직비디오, 광고 캠페인까지 — 기획부터 편집, 컬러그레이딩까지 한 팀이 책임지는 영상 제작사입니다.</p>
+    <div class="hero-actions">
+      <a href="#portfolio" class="btn btn-primary">포트폴리오 보기 →</a>
+      <a href="#contact" class="btn btn-ghost">프로젝트 문의하기</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><b>120+</b><span>완성 프로젝트</span></div>
+    <div class="hero-stat"><b>8년</b><span>업력</span></div>
+    <div class="hero-stat"><b>40+</b><span>파트너 브랜드</span></div>
+  </div>
+  <div class="hero-scroll"><div class="hero-scroll-line"></div>SCROLL</div>
+</section>
+
+<!-- ══════════════════ PORTFOLIO ══════════════════
+     실제 작업물 채울 때: 아래 .portfolio-item 안의 .thumb-placeholder div를
+     <img src="썸네일.jpg" alt="프로젝트명"> 또는
+     <video poster="썸네일.jpg"><source src="영상.mp4"></video> 로 교체하면 됩니다.
+-->
+<section id="portfolio">
+  <div class="wrap">
+    <div class="portfolio-head">
+      <div>
+        <div class="eyebrow reveal">Selected Works</div>
+        <h2 class="section-title reveal">포트폴리오</h2>
+      </div>
+      <div class="filter-tabs reveal">
+        <button class="filter-tab active">전체</button>
+        <button class="filter-tab">브랜드 필름</button>
+        <button class="filter-tab">광고</button>
+        <button class="filter-tab">뮤직비디오</button>
+        <button class="filter-tab">모션그래픽</button>
+      </div>
+    </div>
+
+    <div class="portfolio-grid">
+      <div class="portfolio-item wide reveal">
+        <div class="thumb-placeholder">대표 프로젝트 썸네일 / 영상<br>(16:10 권장)</div>
+        <div class="portfolio-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="portfolio-overlay">
+          <div class="portfolio-cat">브랜드 필름</div>
+          <div class="portfolio-name">프로젝트 제목이 들어갑니다</div>
+        </div>
+      </div>
+      <div class="portfolio-item reveal">
+        <div class="thumb-placeholder">프로젝트 썸네일<br>(4:5 권장)</div>
+        <div class="portfolio-play"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="portfolio-overlay">
+          <div class="portfolio-cat">광고</div>
+          <div class="portfolio-name">프로젝트 제목 2</div>
+        </div>
+      </div>
+      <div class="portfolio-item reveal">
+        <div class="thumb-placeholder">프로젝트 썸네일<br>(4:5 권장)</div>
+        <div class="portfolio-play"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="portfolio-overlay">
+          <div class="portfolio-cat">뮤직비디오</div>
+          <div class="portfolio-name">프로젝트 제목 3</div>
+        </div>
+      </div>
+      <div class="portfolio-item reveal">
+        <div class="thumb-placeholder">프로젝트 썸네일<br>(4:5 권장)</div>
+        <div class="portfolio-play"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="portfolio-overlay">
+          <div class="portfolio-cat">모션그래픽</div>
+          <div class="portfolio-name">프로젝트 제목 4</div>
+        </div>
+      </div>
+      <div class="portfolio-item wide reveal">
+        <div class="thumb-placeholder">프로젝트 썸네일 / 영상<br>(16:10 권장)</div>
+        <div class="portfolio-play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="portfolio-overlay">
+          <div class="portfolio-cat">광고</div>
+          <div class="portfolio-name">프로젝트 제목 5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ SERVICES ══════════════════ -->
+<section id="services">
+  <div class="wrap">
+    <div class="eyebrow reveal">What We Do</div>
+    <h2 class="section-title reveal">서비스 소개</h2>
+    <p class="section-sub reveal">기획 단계부터 최종 납품까지, 프로젝트 성격에 맞는 팀 구성으로 대응합니다.</p>
+
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-num">01</div>
+        <div class="service-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 9.5l5-3v11l-5-3"/></svg>
+        </div>
+        <div class="service-title">영상편집</div>
+        <div class="service-desc">촬영 원본을 완성도 높은 스토리로 재구성합니다. 브랜드 톤에 맞는 리듬감과 편집 문법으로 몰입감 있는 결과물을 만듭니다.</div>
+        <div class="service-tags">
+          <span class="service-tag">가편집 &amp; 종편</span>
+          <span class="service-tag">사운드 믹싱</span>
+          <span class="service-tag">자막/타이포</span>
+        </div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">02</div>
+        <div class="service-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l7 18 2.5-7.5L20 11 3 3z"/></svg>
+        </div>
+        <div class="service-title">모션그래픽</div>
+        <div class="service-desc">타이틀부터 인포그래픽, 3D 비주얼까지 — 브랜드 아이덴티티를 살린 그래픽 요소로 영상의 완성도를 한 단계 끌어올립니다.</div>
+        <div class="service-tags">
+          <span class="service-tag">2D/3D 애니메이션</span>
+          <span class="service-tag">타이틀 디자인</span>
+          <span class="service-tag">인포그래픽</span>
+        </div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">03</div>
+        <div class="service-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 010 18 9 9 0 010-18z" opacity="0.4"/><path d="M3 12h18"/></svg>
+        </div>
+        <div class="service-title">컬러그레이딩</div>
+        <div class="service-desc">일관된 룩앤필을 위한 색보정 작업으로 영상의 분위기를 완성합니다. 매체별 최적화된 컬러 딜리버리를 제공합니다.</div>
+        <div class="service-tags">
+          <span class="service-tag">룩 개발</span>
+          <span class="service-tag">DI 보정</span>
+          <span class="service-tag">HDR 딜리버리</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ ABOUT ══════════════════
+     실제 회사 이미지 적용 시 .about-visual 안 .thumb-placeholder 를 img로 교체
+-->
+<section id="about">
+  <div class="wrap about-grid">
+    <div class="about-visual reveal">
+      <div class="thumb-placeholder">회사 소개 이미지 / 스튜디오 사진<br>(3:4 권장)</div>
+      <div class="about-visual-badge">
+        <b>Since 2017</b>
+        <span>서울 성수동에 위치한 영상 제작 스튜디오</span>
+      </div>
+    </div>
+    <div class="about-text">
+      <div class="eyebrow reveal">About Us</div>
+      <h2 class="section-title reveal">진심을 담은 영상이<br>브랜드를 움직입니다</h2>
+      <p class="reveal">DB프로덕션은 기획, 촬영, 편집, 후반작업까지 전 과정을 내재화한 프로덕션입니다. 클라이언트의 메시지를 가장 효과적으로 전달할 수 있는 영상 문법을 함께 고민하며, 작은 프로젝트부터 대형 캠페인까지 동일한 완성도로 작업합니다.</p>
+      <p class="reveal">매 프로젝트마다 전담 PD와 에디터가 배정되어 커뮤니케이션 누락 없이 진행되며, 촬영 장비부터 자체 편집실, 컬러그레이딩 스튜디오까지 원스톱으로 운영합니다.</p>
+
+      <div class="about-stats reveal">
+        <div class="about-stat"><b>120+</b><span>누적 프로젝트</span></div>
+        <div class="about-stat"><b>40+</b><span>협업 브랜드</span></div>
+        <div class="about-stat"><b>15</b><span>전담 크루</span></div>
+      </div>
+
+      <div class="about-clients reveal">
+        <div class="about-clients-label">Trusted By</div>
+        <div class="client-row">
+          <span class="client-chip">클라이언트 A</span>
+          <span class="client-chip">클라이언트 B</span>
+          <span class="client-chip">클라이언트 C</span>
+          <span class="client-chip">클라이언트 D</span>
+          <span class="client-chip">클라이언트 E</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ CONTACT ══════════════════ -->
+<section id="contact">
+  <div class="wrap contact-grid">
+    <div>
+      <div class="eyebrow reveal">Get In Touch</div>
+      <h2 class="section-title reveal">프로젝트를<br>문의해주세요</h2>
+      <p class="section-sub reveal">간단한 정보만 남겨주시면 24시간 이내에 담당 PD가 연락드립니다.</p>
+
+      <div class="contact-info-item reveal">
+        <div class="contact-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+        <div><b>Phone</b><span>02-0000-0000</span></div>
+      </div>
+      <div class="contact-info-item reveal">
+        <div class="contact-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M22 6l-10 7L2 6"/></svg></div>
+        <div><b>Email</b><span>hello@dbproduction.co.kr</span></div>
+      </div>
+      <div class="contact-info-item reveal">
+        <div class="contact-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div><b>Studio</b><span>서울특별시 성동구 성수동 000-00</span></div>
+      </div>
+    </div>
+
+    <div class="contact-form reveal">
+      <form id="contactForm" onsubmit="handleSubmit(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">성함 / 회사명 *</label>
+            <input class="form-input" type="text" name="from_name" placeholder="홍길동 / OO브랜드" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">연락처 *</label>
+            <input class="form-input" type="tel" name="from_phone" placeholder="010-0000-0000" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">이메일</label>
+          <input class="form-input" type="email" name="from_email" placeholder="example@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">문의 유형 *</label>
+          <select class="form-select form-input" name="project_type" required>
+            <option value="" disabled selected>문의 유형을 선택해주세요</option>
+            <option>브랜드 필름</option>
+            <option>광고 영상</option>
+            <option>뮤직비디오</option>
+            <option>모션그래픽</option>
+            <option>컬러그레이딩</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">프로젝트 내용</label>
+          <textarea class="form-textarea form-input" name="message" placeholder="예산, 일정, 참고 레퍼런스 등 자유롭게 남겨주세요."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary form-submit" id="submitBtn">문의 보내기 →</button>
+        <div class="form-note">제출 시 개인정보 수집·이용에 동의하는 것으로 간주합니다.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div class="footer-copy">© 2026 DB프로덕션. All rights reserved.</div>
+    <div class="footer-links">
+      <a href="#">개인정보처리방침</a>
+      <a href="#">이용약관</a>
+      <a href="#hero">맨 위로 ↑</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+const revealEls = document.querySelectorAll('.reveal');
+const ro = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); } });
+}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+revealEls.forEach(el => ro.observe(el));
+
+document.querySelectorAll('.filter-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    // TODO: 실제 데이터 연결 시 여기서 tab.textContent 기준으로 .portfolio-item 필터링 로직 추가
+  });
+});
+
+function handleSubmit(e) {
+  e.preventDefault();
+  // TODO: 이메일 알림 연동 시 (EmailJS/Formspree 등) 여기에 전송 로직 추가
+  alert('문의가 접수되었습니다. 담당 PD가 곧 연락드리겠습니다. (현재는 데모 상태로 실제 전송되지 않습니다)');
+  e.target.reset();
+}
+</script>
+</body>
+</html>
